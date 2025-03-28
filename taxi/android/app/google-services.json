@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "878969956289",
+    "project_id": "kurdway-e939e",
+    "storage_bucket": "kurdway-e939e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:878969956289:android:1f9612a107e383a01d7140",
+        "android_client_info": {
+          "package_name": "com.taxiapp.taxi"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDtbZWQ3n-HsKfECamShstK13dFpuZTGUI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
