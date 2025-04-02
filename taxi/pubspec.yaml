@@ -103,7 +103,7 @@ flutter:
      - assets/icons/taxi.png
      - assets/icons/pin.png
      - assets/icons/placeholder.png
-
+     - mapstyle/style.json
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

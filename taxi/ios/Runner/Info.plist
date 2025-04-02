@@ -6,6 +6,8 @@
 <string>We need your location to update your profile</string>
 <key>NSLocationAlwaysUsageDescription</key>
 <string>We need your location for real-time tracking</string>
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>Your app requires location access</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>

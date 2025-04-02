@@ -214,8 +214,7 @@ class _HomePageState extends State<HomePage> {
 
     // Get user's current location with best accuracy
     Position position = await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high,
-      forceAndroidLocationManager: true, // Ensure fresh location on Android
+      desiredAccuracy: LocationAccuracy.best,
     );
 
     var userDoc = await usersRef.doc(widget.currentUserId).get();
@@ -249,7 +248,8 @@ class _HomePageState extends State<HomePage> {
       }
 
       print("✅ Location updated: ${position.latitude}, ${position.longitude}");
-      getCityFromCoordinates(position.latitude, position.longitude);
+      await getCityFromCoordinates(
+          position.latitude, position.longitude, widget.currentUserId);
     }
 
     if (mounted) {
@@ -259,34 +259,42 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-// Fetch city name from coordinates
-  Future<void> getCityFromCoordinates(double lat, double lon) async {
+  Future<void> getCityFromCoordinates(
+      double lat, double lon, String currentUserId) async {
     try {
       List<Placemark> placemarks = await placemarkFromCoordinates(lat, lon);
 
       if (placemarks.isNotEmpty) {
         Placemark place = placemarks.first;
 
-        // Extracting city and area with additional fields for debugging
-        String city = place.locality ?? "Unknown City";
-        String area = place.subLocality ?? "Unknown Area";
-        String street = place.thoroughfare ?? "Unknown Street";
-        String country = place.country ?? "Unknown Country";
-        String postalCode = place.postalCode ?? "Unknown Postal Code";
+        // Construct a more detailed address string with null checks
+        String address = [
+          place.street,
+          place.subLocality,
+          place.locality,
+          place.administrativeArea,
+          place.postalCode,
+          place.country,
+        ].where((element) => element != null && element.isNotEmpty).join(', ');
 
-        // Printing detailed place info for debugging
-        print(
-            "🏙 City: $city, 📍 Area: $area, 🛣 Street: $street, 🌍 Country: $country, 📮 Postal Code: $postalCode");
+        print('Address found: $address');
 
-        // Update Firestore with city and area
-        await usersRef.doc(widget.currentUserId).update({
-          "currentCity": "$city, $area",
+        // Update Firestore with the constructed address (or a part of it)
+        await usersRef.doc(currentUserId).update({
+          "currentCity":
+              address.isNotEmpty ? address : 'Address details unavailable',
         });
       } else {
-        print("⚠️ No placemarks found.");
+        print('⚠️ No address found for coordinates: $lat, $lon');
+        await usersRef.doc(currentUserId).update({
+          "currentCity": 'Unknown Location',
+        });
       }
     } catch (e) {
-      print("⚠️ Error fetching city and area: $e");
+      print('⚠️ Error fetching address: $e');
+      await usersRef.doc(currentUserId).update({
+        "currentCity": 'Error fetching address',
+      });
     }
   }
 }

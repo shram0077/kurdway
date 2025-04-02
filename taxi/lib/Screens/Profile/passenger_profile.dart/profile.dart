@@ -10,7 +10,7 @@ import 'package:taxi/Utils/texts.dart';
 
 passengerProfile(UserModel userModel, context) {
   return SingleChildScrollView(
-    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
     child: Column(
       children: [
         Row(
@@ -33,11 +33,12 @@ passengerProfile(UserModel userModel, context) {
                     Navigator.push(
                       context,
                       PageTransition(
-                          type: PageTransitionType.rightToLeft,
-                          child: EditProfile(
-                            currentUserId: userModel.userid,
-                            userModel: userModel,
-                          )),
+                        type: PageTransitionType.rightToLeft,
+                        child: EditProfile(
+                          currentUserId: userModel.userid,
+                          userModel: userModel,
+                        ),
+                      ),
                     );
                   },
                   child: CircleAvatar(
@@ -52,46 +53,55 @@ passengerProfile(UserModel userModel, context) {
                 ),
               ],
             ),
-            Padding(
-              padding: const EdgeInsets.only(left: 7.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SizedBox(height: 10),
-                  robotoText(userModel.name, Colors.black, 20, FontWeight.bold),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        CupertinoIcons.phone,
-                        size: 18,
-                        color: Colors.grey,
-                      ),
-                      robotoText(
-                    "· 0${userModel.phone.substring(4)}",
-                          Colors.grey,
-                          15,
-                          FontWeight.w700)
-                    ],
-                  ),
-                  SizedBox(height: 2),
-                  Row(
-                    children: [
-                      Icon(
-                        CupertinoIcons.location,
-                        size: 18,
-                        color: Colors.grey,
-                      ),
-                      robotoText(" · ${userModel.currentCity}", Colors.grey, 14,
-                          FontWeight.bold),
-                    ],
-                  ),
-                ],
+            Expanded(
+              // Wrap the Column in Expanded
+              child: Padding(
+                padding: const EdgeInsets.only(left: 7.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment:
+                      CrossAxisAlignment.start, // Align text to start
+                  children: [
+                    const SizedBox(height: 10),
+                    robotoText(
+                        userModel.name, Colors.black, 20, FontWeight.bold),
+                    Row(
+                      children: [
+                        const Icon(
+                          CupertinoIcons.phone,
+                          size: 18,
+                          color: Colors.grey,
+                        ),
+                        robotoText("· 0${userModel.phone.substring(4)}",
+                            Colors.grey, 15, FontWeight.w700),
+                      ],
+                    ),
+                    const SizedBox(height: 2),
+                    Row(
+                      children: [
+                        const Icon(
+                          CupertinoIcons.location,
+                          size: 18,
+                          color: Colors.grey,
+                        ),
+                        Expanded(
+                          // Wrap the location text in Expanded
+                          child: robotoText(
+                            " · ${userModel.currentCity}",
+                            Colors.grey,
+                            14,
+                            FontWeight.bold,
+                          ), // Added maxLines and overflow
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            )
+            ),
           ],
         ),
-        Divider(),
+        const Divider(),
         Row(
           children: [
             robotoText("Ride Preferences", blackColor, 18, FontWeight.w600)
@@ -106,7 +116,7 @@ passengerProfile(UserModel userModel, context) {
             ],
           ),
         ),
-        Divider(),
+        const Divider(),
         Row(
           children: [robotoText("General", blackColor, 18, FontWeight.w600)],
         ),
@@ -118,7 +128,7 @@ passengerProfile(UserModel userModel, context) {
             ],
           ),
         ),
-        Divider(),
+        const Divider(),
         Row(
           children: [
             robotoText("App Support & Privacy", blackColor, 18, FontWeight.w600)
@@ -135,10 +145,10 @@ passengerProfile(UserModel userModel, context) {
             ],
           ),
         ),
-        Divider(),
+        const Divider(),
         _buildListTile(Icons.logout, 'Log Out'),
-        SizedBox(height: 20),
-        Text('App Version 2.3', style: TextStyle(color: Colors.grey)),
+        const SizedBox(height: 20),
+        const Text('App Version 2.3', style: TextStyle(color: Colors.grey)),
       ],
     ),
   );
@@ -150,7 +160,7 @@ Widget _buildListTile(IconData icon, String title) {
       icon,
     ),
     title: robotoText(title, blackColor, 16, FontWeight.w500),
-    trailing: Icon(
+    trailing: const Icon(
       Icons.arrow_forward_ios,
       size: 16,
     ),
