@@ -7,13 +7,12 @@ KurdWay is a modern ride-hailing and bus-tracking application built with **Flutt
 ## ✨ Features
 
 * 🚖 **Taxi Booking**: Book rides with real-time tracking and trip details.
-* 🚌 **Bus Tracking**: View nearby buses with live location updates.
 * 💳 **Wallet System**: Recharge your balance and pay seamlessly. *(Internal)*
 * 🗜️ **Google Maps Integration**: Real-time location, routes, and directions.
 * 🧰 **Admin Panel**: Web & desktop panel to manage rides, users, and transactions. *(Paid)*
 * 🔐 **OTP Authentication**: Secure login and sign-up using phone verification.
 * ☁️ **Profile Image Upload**: Uses Filelua cloud storage to upload and store user profile pictures.
-* 🌐 **Multiplatform**: Supports Android, iOS, Web, Windows, Mac, and Linux.
+* 🌐 **Multiplatform**: Supports Android, iOS
 
 ---
 
