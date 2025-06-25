@@ -50,19 +50,20 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyDtbZWQ3n-HsKfECamShstK13dFpuZTGUI',
-    appId: '1:878969956289:android:1f9612a107e383a01d7140',
-    messagingSenderId: '878969956289',
-    projectId: 'kurdway-e939e',
-    storageBucket: 'kurdway-e939e.firebasestorage.app',
+    apiKey: 'AIzaSyAKTtEDmnqjsK8oxY4x3huYr_vo1NHlnTc',
+    appId: '1:890081620349:android:ea5666a6aed9e5d9cf9c14',
+    messagingSenderId: '890081620349',
+    projectId: 'kurd-way',
+    storageBucket: 'kurd-way.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyCk502TjjWkqKMXdNcFUYnf7SWrmoOTMSE',
-    appId: '1:878969956289:ios:a7af8c96ae75eebf1d7140',
-    messagingSenderId: '878969956289',
-    projectId: 'kurdway-e939e',
-    storageBucket: 'kurdway-e939e.firebasestorage.app',
+    apiKey: 'AIzaSyBafNT5IcBikFIoVo1q9uMOrg_MbeY8g5Y',
+    appId: '1:890081620349:ios:edf8b381966de424cf9c14',
+    messagingSenderId: '890081620349',
+    projectId: 'kurd-way',
+    storageBucket: 'kurd-way.firebasestorage.app',
     iosBundleId: 'com.taxiapp.taxi',
   );
+
 }

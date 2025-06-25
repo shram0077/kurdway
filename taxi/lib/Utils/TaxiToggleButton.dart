@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:taxi/Constant/colors.dart';
 import 'package:taxi/Constant/firesbase.dart';
@@ -79,7 +78,7 @@ class _TaxiToggleButtonState extends State<TaxiToggleButton>
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: greenColor2,
-        title: robotoText("Confirm", taxiYelloColor, 25, FontWeight.bold),
+        title: robotoText("Confirm", taxiYellowColor, 25, FontWeight.bold),
         content:
             robotoText(confirmationMessage, whiteColor, 18, FontWeight.w500),
         actions: [
@@ -112,7 +111,7 @@ class _TaxiToggleButtonState extends State<TaxiToggleButton>
           height: 55,
           width: 55,
           decoration: BoxDecoration(
-            color: isTaxiOn ? Colors.green.withOpacity(0.9) : taxiYelloColor,
+            color: isTaxiOn ? Colors.green.withOpacity(0.9) : taxiYellowColor,
             borderRadius: BorderRadius.circular(27.5),
             boxShadow: [
               BoxShadow(

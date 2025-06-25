@@ -1,16 +1,20 @@
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:taxi/Constant/colors.dart';
 import 'package:taxi/Models/UserModel.dart';
+import 'package:taxi/Utils/Loadings/Cardwallet_loading.dart';
 import 'package:taxi/Utils/texts.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class WalletCard extends StatefulWidget {
   final bool isLoading;
   final UserModel userModel;
 
-  const WalletCard({Key? key, required this.isLoading, required this.userModel})
-      : super(key: key);
+  const WalletCard({
+    super.key,
+    required this.isLoading,
+    required this.userModel,
+  });
 
   @override
   _WalletCardState createState() => _WalletCardState();
@@ -25,266 +29,186 @@ class _WalletCardState extends State<WalletCard> {
     _loadBalanceVisibility();
   }
 
-  // Load the visibility setting from SharedPreferences
-  void _loadBalanceVisibility() async {
+  Future<void> _loadBalanceVisibility() async {
     final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _isBalanceVisible = prefs.getBool('isBalanceVisible') ??
-          true; // Default to true if no setting found
-    });
+    if (mounted) {
+      setState(() {
+        _isBalanceVisible = prefs.getBool('isBalanceVisible') ?? true;
+      });
+    }
   }
 
-  // Save the visibility setting to SharedPreferences
-  void _toggleBalanceVisibility() async {
+  Future<void> _toggleBalanceVisibility() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       _isBalanceVisible = !_isBalanceVisible;
-      prefs.setBool('isBalanceVisible', _isBalanceVisible); // Save the setting
+      prefs.setBool('isBalanceVisible', _isBalanceVisible);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.only(left: 9.0, top: 4, right: 5, bottom: 5),
-      width: 395,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        color: Color.fromARGB(255, 8, 171, 90),
+    if (widget.isLoading) {
+      return buildLoadingCard();
+    }
+
+    return Card(
+      elevation: 8,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      color: primaryColor,
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize:
+              MainAxisSize.min, // Constrain column size to its children
+          children: [
+            _buildHeader(),
+            const SizedBox(height: 20),
+            _buildBalance(),
+            const SizedBox(height: 25),
+            _buildActions(),
+          ],
+        ),
       ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        robotoText("Balance", Colors.white, 22, FontWeight.bold),
+        IconButton(
+          onPressed: _toggleBalanceVisibility,
+          icon: Icon(
+            _isBalanceVisible ? EvaIcons.eyeOffOutline : EvaIcons.eyeOutline,
+            color: Colors.white,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBalance() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        const Icon(EvaIcons.creditCardOutline, color: Colors.white, size: 28),
+        const SizedBox(width: 10),
+        Expanded(
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            transitionBuilder: (child, animation) {
+              return FadeTransition(opacity: animation, child: child);
+            },
+            // The key is now on a Container that wraps the robotoText widget
+            child: Container(
+              key: ValueKey<bool>(
+                  _isBalanceVisible), // Apply key to a widget that accepts it
+              child: robotoText(
+                _isBalanceVisible
+                    ? "•••••"
+                    : "${widget.userModel.walletBalance} IQD",
+                Colors.white,
+                26,
+                FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActions() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Flexible(
+          child: _buildActionButton(
+            icon: Icons.history,
+            label: "Transactions",
+            onTap: () {
+              // Handle transactions tap
+            },
+          ),
+        ),
+        const SizedBox(width: 10),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildSmallActionButton(
+              imagePath: "assets/images/Card_Payment.png",
+              label: "Withdraw",
+              onTap: () {
+                // Handle withdrawal tap
+              },
+            ),
+            const SizedBox(width: 10),
+            _buildSmallActionButton(
+              imagePath: "assets/images/deposit.png",
+              label: "Deposit",
+              onTap: () {
+                // Handle deposit tap
+              },
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActionButton(
+      {required IconData icon,
+      required String label,
+      required VoidCallback onTap}) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.2),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, color: Colors.white, size: 22),
+            const SizedBox(width: 8),
+            Flexible(
+              child: robotoText(label, Colors.white, 14, FontWeight.bold),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSmallActionButton(
+      {required String imagePath,
+      required String label,
+      required VoidCallback onTap}) {
+    return InkWell(
+      onTap: onTap,
       child: Column(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              widget.isLoading
-                  ? Container(
-                      width: 100,
-                      height: 20,
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(5),
-                          color: const Color.fromARGB(149, 220, 220, 220)),
-                    )
-                  : robotoText("Balance", whiteColor, 22, FontWeight.bold),
-              IconButton(
-                onPressed:
-                    _toggleBalanceVisibility, // Toggle balance visibility
-                icon: Icon(
-                  _isBalanceVisible ? EvaIcons.eyeOff : EvaIcons.eye,
-                  color: whiteColor,
-                ),
+          Container(
+            width: 55,
+            height: 55,
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(12),
+              image: DecorationImage(
+                image: AssetImage(imagePath),
+                fit: BoxFit.cover,
               ),
-            ],
+            ),
           ),
-          Row(
-            children: [
-              widget.isLoading
-                  ? SizedBox()
-                  : Icon(
-                      EvaIcons.creditCard,
-                      color: whiteColor,
-                    ),
-              widget.isLoading
-                  ? Container(
-                      width: 110,
-                      height: 25,
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(5),
-                          color: const Color.fromARGB(149, 220, 220, 220)),
-                    )
-                  : robotoText(
-                      _isBalanceVisible
-                          ? " ****"
-                          : " ${widget.userModel.walletBalance}",
-                      whiteColor,
-                      22,
-                      FontWeight.bold), // Hide balance if false
-              widget.isLoading
-                  ? SizedBox()
-                  : _isBalanceVisible
-                      ? Container()
-                      : robotoText(" IQD", whiteColor, 22, FontWeight.w900),
-            ],
-          ),
-          SizedBox(
-            height: 21,
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Container(
-                padding: EdgeInsets.only(left: 3),
-                width: 130,
-                height: 31,
-                decoration: ShapeDecoration(
-                  color: greenColor2,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.history,
-                      color: whiteColor,
-                      size: 20,
-                    ),
-                    robotoText(
-                        " Transactions", whiteColor, 15, FontWeight.bold),
-                  ],
-                ),
-              ),
-              Spacer(),
-              Column(
-                children: [
-                  Container(
-                    width: 50,
-                    height: 50,
-                    decoration: ShapeDecoration(
-                      image: DecorationImage(
-                          image: AssetImage("assets/images/Card_Payment.png")),
-                      color: greenColor2,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                  ),
-                  robotoText("withdrawal", whiteColor, 13, FontWeight.w800),
-                ],
-              ),
-              SizedBox(
-                width: 8,
-              ),
-              Column(
-                children: [
-                  Container(
-                    width: 50,
-                    height: 50,
-                    decoration: ShapeDecoration(
-                      image: DecorationImage(
-                          image: AssetImage("assets/images/deposit.png")),
-                      color: greenColor2,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                  ),
-                  robotoText("Deposit", whiteColor, 13, FontWeight.w800),
-                ],
-              )
-            ],
-          ),
+          const SizedBox(height: 5),
+          robotoText(label, Colors.white, 13, FontWeight.w800),
         ],
       ),
     );
   }
-}
-
-loadingCardWallet() {
-  return Container(
-    padding: const EdgeInsets.only(left: 9.0, top: 4, right: 5, bottom: 5),
-    width: 395,
-    decoration: BoxDecoration(
-      borderRadius: BorderRadius.circular(12),
-      color: Color(0xFF0AD36F),
-    ),
-    child: Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Container(
-              width: 100,
-              height: 20,
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(5),
-                  color: const Color.fromARGB(149, 220, 220, 220)),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(top: 8.0, right: 5),
-              child: Container(
-                width: 25,
-                height: 25,
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(5),
-                    color: const Color.fromARGB(149, 220, 220, 220)),
-              ),
-            ),
-          ],
-        ),
-        Row(
-          children: [
-            Container(
-              width: 25,
-              height: 25,
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(5),
-                  color: const Color.fromARGB(149, 220, 220, 220)),
-            ),
-            SizedBox(
-              width: 5,
-            ),
-            Container(
-              width: 110,
-              height: 25,
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(5),
-                  color: const Color.fromARGB(149, 220, 220, 220)),
-            )
-          ],
-        ),
-        SizedBox(
-          height: 21,
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Container(
-              padding: EdgeInsets.only(left: 3),
-              width: 130,
-              height: 31,
-              decoration: ShapeDecoration(
-                color: const Color.fromARGB(149, 220, 220, 220),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(5),
-                ),
-              ),
-            ),
-            Spacer(),
-            Column(
-              children: [
-                Container(
-                  width: 45,
-                  height: 45,
-                  decoration: ShapeDecoration(
-                    color: const Color.fromARGB(149, 220, 220, 220),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(
-              width: 8,
-            ),
-            Column(
-              children: [
-                Container(
-                  width: 45,
-                  height: 45,
-                  decoration: ShapeDecoration(
-                    color: const Color.fromARGB(149, 220, 220, 220),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                ),
-              ],
-            )
-          ],
-        ),
-      ],
-    ),
-  );
 }

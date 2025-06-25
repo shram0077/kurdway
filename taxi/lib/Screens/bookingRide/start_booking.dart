@@ -7,11 +7,11 @@ import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:page_transition/page_transition.dart';
 import 'package:taxi/Constant/colors.dart';
 import 'package:taxi/Constant/firesbase.dart';
 import 'package:taxi/Models/UserModel.dart';
-import 'package:taxi/Screens/bookingRide/bookingRide.dart';
+import 'package:taxi/Screens/bookingRide/utils/taxi_sheet.dart';
+import 'package:taxi/Services/DatabaseServices.dart';
 import 'package:taxi/Utils/loading_page.dart';
 import 'package:taxi/Utils/texts.dart';
 
@@ -34,6 +34,7 @@ class _StartBookingState extends State<StartBooking> {
 
   String? currentLocation;
   GoogleMapController? _mapController;
+  StreamSubscription<Position>? _positionStreamSubscription;
 
   String? homePlaceName;
   String? workPlaceName;
@@ -46,141 +47,100 @@ class _StartBookingState extends State<StartBooking> {
         .then((style) {
       mapstyle = style;
     });
-    _getCurrentLocation();
+    startLiveLocationTracking();
     setCoustomMarkerIcon();
     _fetchTaxiLocations();
-    // _trackUserLocation();
   }
 
-  // StreamSubscription<Position>? _positionStream;
-
-  // void _trackUserLocation() async {
-  //   LocationPermission permission = await Geolocator.checkPermission();
-  //   if (permission == LocationPermission.denied) {
-  //     permission = await Geolocator.requestPermission();
-  //   }
-
-  //   if (permission == LocationPermission.deniedForever) {
-  //     print("Location permissions are permanently denied.");
-  //     return;
-  //   }
-
-  //   const LocationSettings locationSettings = LocationSettings(
-  //     accuracy: LocationAccuracy.low,
-  //   );
-
-  //   _positionStream =
-  //       Geolocator.getPositionStream(locationSettings: locationSettings)
-  //           .listen((Position position) {
-  //     if (mounted) {
-  //       setState(() {
-  //         _currentPosition = LatLng(position.latitude, position.longitude);
-  //       });
-
-  //       // Animate camera to new position
-  //       if (_mapController != null) {
-  //         _mapController!.animateCamera(
-  //           CameraUpdate.newLatLng(_currentPosition!),
-  //         );
-  //       }
-
-  //       // Update Firestore with new location
-  //       if (widget.userModel.role == 'passenger') {
-  //         usersRef.doc(widget.currentUserId).update({
-  //           'currentLocation': {
-  //             'latitude': position.latitude,
-  //             'longitude': position.longitude,
-  //             'timestamp': FieldValue.serverTimestamp(),
-  //           }
-  //         });
-  //       } else if (widget.userModel.role == 'driver') {
-  //         usersRef.doc(widget.currentUserId).update({
-  //           'currentLocation': {
-  //             'latitude': position.latitude,
-  //             'longitude': position.longitude,
-  //             'timestamp': FieldValue.serverTimestamp(),
-  //           }
-  //         }).whenComplete(
-  //           () {
-  //             taxisRef.doc(widget.currentUserId).update({
-  //               'location': {
-  //                 'latitude': position.latitude,
-  //                 'longitude': position.longitude,
-  //                 'timestamp': FieldValue.serverTimestamp(),
-  //               }
-  //             });
-  //           },
-  //         );
-  //       }
-
-  //       print("Location updated: ${position.latitude}, ${position.longitude}");
-  //     }
-  //   });
-  // }
-
-  // @override
-  // void dispose() {
-  //   _positionStream?.cancel(); // Stop listening when widget is disposed
-
-  //   super.dispose();
-  // }
+  @override
+  void dispose() {
+    _positionStreamSubscription?.cancel();
+    super.dispose();
+  }
 
   Future<void> _fetchTaxiLocations() async {
     taxisRef.where("isActive", isEqualTo: true).snapshots().listen((snapshot) {
       Set<Marker> updatedMarkers = {};
+
       for (var doc in snapshot.docs) {
         var data = doc.data();
 
         if (data.containsKey('location')) {
-          var location = data['location']; // Get the location map
+          var location = data['location'];
+
           if (location.containsKey('latitude') &&
               location.containsKey('longitude')) {
-            double lat = location['latitude']; // ✅ Correct
-            double lng = location['longitude']; // ✅ Correct
+            double lat = location['latitude'];
+            double lng = location['longitude'];
 
             updatedMarkers.add(
               Marker(
-                  markerId: MarkerId(doc.id),
-                  position: LatLng(lat, lng),
-                  infoWindow: InfoWindow(title: "Taxi ${doc.id}"),
-                  icon: taxiIcon),
+                markerId: MarkerId(doc.id),
+                position: LatLng(lat, lng),
+                icon: taxiIcon,
+                onTap: () {
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                    builder: (context) => DraggableScrollableSheet(
+                      initialChildSize: 0.5,
+                      minChildSize: 0.3,
+                      maxChildSize: 0.95,
+                      expand: false,
+                      builder: (context, scrollController) => Container(
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          borderRadius:
+                              BorderRadius.vertical(top: Radius.circular(20)),
+                        ),
+                        child: TaxiInfoSheet(
+                          taxiId: doc.id,
+                          scrollController: scrollController,
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
             );
           }
         }
       }
+
       setState(() {
         _taxiMarkers = updatedMarkers;
       });
-      print("Fetched ${snapshot.docs.length} taxis from Firestore");
     });
   }
 
-  Future<void> _getCurrentLocation() async {
-    try {
-      Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.best,
-      );
+  void startLiveLocationTracking() {
+    const LocationSettings locationSettings = LocationSettings(
+      accuracy: LocationAccuracy.best,
+      distanceFilter: 10, // meters before it triggers another update
+    );
 
-      // Get address from the coordinates
+    _positionStreamSubscription = Geolocator.getPositionStream(
+      locationSettings: locationSettings,
+    ).listen((Position position) async {
       currentLocation = await _getAddressFromCoordinates(
           position.latitude, position.longitude);
+
+      // Optional: Update Firestore or database
+      Databaseservices.updatePosition(widget.currentUserId,
+          widget.userModel.role, position.latitude, position.longitude);
 
       setState(() {
         _currentPosition = LatLng(position.latitude, position.longitude);
       });
 
-      // Animate the map to the current location
+      // Move the map camera if needed
       if (_mapController != null) {
         _mapController!.animateCamera(
-          CameraUpdate.newLatLngZoom(_currentPosition!, 15),
+          CameraUpdate.newLatLng(_currentPosition!),
         );
       }
-
-      print("Current Location: ${position.latitude}, ${position.longitude}");
-      loadUserAddresses();
-    } catch (e) {
-      print('Error fetching location: $e');
-    }
+    });
   }
 
   // Convert coordinates to an address
@@ -204,6 +164,7 @@ class _StartBookingState extends State<StartBooking> {
         ].where((element) => element != null && element.isNotEmpty).join(', ');
 
         print('Address found: $address'); // Log the found address
+        Databaseservices.updateCurrentAddress(address, widget.currentUserId);
         return address.isNotEmpty
             ? address
             : 'Address details unavailable'; // Return the address or a message
@@ -273,25 +234,12 @@ class _StartBookingState extends State<StartBooking> {
     return Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
-          centerTitle: true,
-          title: Container(
-            width: 125,
-            padding: EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: taxiYelloColor,
-              borderRadius: BorderRadius.circular(18),
-            ),
-            child: Row(
-              children: [
-                robotoText("for Myself", whiteColor, 15, FontWeight.w500),
-                Icon(Icons.arrow_drop_down, color: whiteColor),
-              ],
-            ),
-          ),
+          title: robotoText("Book a Ride!", blackColor, 19, FontWeight.w500),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.vertical(bottom: Radius.circular(15)),
           ),
-          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          backgroundColor: Colors.white,
+          elevation: 0,
           automaticallyImplyLeading: false,
           leading: IconButton(
             onPressed: () {
@@ -299,25 +247,9 @@ class _StartBookingState extends State<StartBooking> {
             },
             icon: Icon(Icons.arrow_back_ios, color: blackColor),
           ),
-          actions: [
-            IconButton(
-              icon: Icon(CupertinoIcons.map),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  PageTransition(
-                    type: PageTransitionType.bottomToTop, // Animation type
-                    child: BookRidePage(
-                        currentUserId: widget.currentUserId,
-                        userModel: widget.userModel), // Navigate to this screen
-                  ),
-                );
-              },
-            ),
-          ],
         ),
         body: _currentPosition == null
-            ? LocationLoading(title:  "Getting your current location...")
+            ? LocationLoading(title: "Getting your current location...")
             : Column(
                 children: [
                   _fromField(),
@@ -467,7 +399,7 @@ class _StartBookingState extends State<StartBooking> {
                   color: Colors.grey,
                 ),
               ),
-              suffixIcon: Container(
+              suffixIcon: SizedBox(
                 width: 100,
                 child: IntrinsicHeight(
                   child: Row(
@@ -483,12 +415,15 @@ class _StartBookingState extends State<StartBooking> {
                           padding: const EdgeInsets.all(8.0),
                           child: IconButton(
                             onPressed: () {
-                              _getCurrentLocation();
+                              startLiveLocationTracking();
                               loadUserAddresses();
+                              _mapController!.animateCamera(
+                                CameraUpdate.newLatLng(_currentPosition!),
+                              );
                             },
                             icon: Icon(
-                              CupertinoIcons.refresh,
-                              color: taxiYelloColor,
+                              CupertinoIcons.location,
+                              color: Colors.grey.shade700,
                             ),
                           )),
                     ],
@@ -523,7 +458,11 @@ class _StartBookingState extends State<StartBooking> {
         controller: destinationLocationController,
         cursorColor: greenColor,
         onSubmitted: (value) {
-          _searchDestination(value); // Search and mark on map
+          if (value.isEmpty) {
+            return;
+          } else {
+            _searchDestination(value);
+          }
         },
         decoration: InputDecoration(
           filled: true,

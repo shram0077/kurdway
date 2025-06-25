@@ -115,7 +115,7 @@ class _EditProfileState extends State<EditProfile> {
 
   Future<Map<String, String>?> _getUploadServer() async {
     final url =
-        Uri.parse('https://filelu.com/api/upload/server?key=${fileluApiKey}');
+        Uri.parse('https://filelu.com/api/upload/server?key=$fileluApiKey');
     try {
       final response = await http.get(url);
       if (response.statusCode == 200) {
@@ -170,7 +170,7 @@ class _EditProfileState extends State<EditProfile> {
 
   Future<String?> _getDirectLink(String fileCode) async {
     final url = Uri.parse(
-        'https://filelu.com/api/file/direct_link?key=${fileluApiKey}&file_code=$fileCode');
+        'https://filelu.com/api/file/direct_link?key=$fileluApiKey&file_code=$fileCode');
     try {
       final response = await http.get(url);
       if (response.statusCode == 200) {

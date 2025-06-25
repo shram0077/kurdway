@@ -22,6 +22,8 @@ class _DriverInfoFormState extends State<DriverInfoForm> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _plateController = TextEditingController();
   final TextEditingController _provinceController = TextEditingController();
+  bool _isSubmitting = false;
+
   String? name;
   String? _selectedCarBrand;
   String? _selectedCarModel;
@@ -120,12 +122,11 @@ class _DriverInfoFormState extends State<DriverInfoForm> {
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
-        onPressed: submitForm, // Disable button when loading
+        onPressed: _isSubmitting ? null : submitForm,
         backgroundColor: splashGreenBGColor,
-        child: Icon(
-          CupertinoIcons.arrow_right,
-          color: whiteColor,
-        ),
+        child: _isSubmitting
+            ? const CircularProgressIndicator(color: Colors.white)
+            : Icon(CupertinoIcons.arrow_right, color: whiteColor),
       ),
       appBar: AppBar(
         centerTitle: true,
@@ -150,34 +151,38 @@ class _DriverInfoFormState extends State<DriverInfoForm> {
               child: Column(
                 children: [
                   TextFormField(
-                      onChanged: (value) {
-                        name = value;
-                      },
-                      controller: _nameController,
-                      keyboardType: TextInputType.text,
-                      decoration: InputDecoration(
-                        labelText: 'Name',
-                        hintText: 'e.g. Ali Kareem',
-                        hintStyle: GoogleFonts.roboto(
-                            color: blackColor.withOpacity(0.3),
-                            fontSize: 14,
-                            fontWeight: FontWeight.normal),
-                        prefixIcon: Icon(Icons.person),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(12.0)),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(12.0)),
-                          borderSide:
-                              BorderSide(color: splashGreenBGColor, width: 2.0),
-                        ),
+                    onChanged: (value) {
+                      name = value;
+                    },
+                    controller: _nameController,
+                    keyboardType: TextInputType.text,
+                    decoration: InputDecoration(
+                      labelText: 'Name',
+                      hintText: 'e.g. Ali Kareem',
+                      hintStyle: GoogleFonts.roboto(
+                          color: blackColor.withOpacity(0.3),
+                          fontSize: 14,
+                          fontWeight: FontWeight.normal),
+                      prefixIcon: Icon(Icons.person),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(12.0)),
                       ),
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'Please enter your name';
-                        }
-                        return null;
-                      }),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(12.0)),
+                        borderSide:
+                            BorderSide(color: splashGreenBGColor, width: 2.0),
+                      ),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Please enter your name';
+                      }
+                      if (!RegExp(r"^[a-zA-Z\s]+$").hasMatch(value)) {
+                        return 'Only letters and spaces are allowed';
+                      }
+                      return null;
+                    },
+                  ),
                   SizedBox(
                     height: 11,
                   ),
@@ -561,68 +566,102 @@ class _DriverInfoFormState extends State<DriverInfoForm> {
 
   // Function to show CupertinoPicker
   void _showLetterPicker(BuildContext context) {
+    final initialIndex =
+        _selectedLetter != null ? _letters.indexOf(_selectedLetter!) : 0;
+
     showCupertinoModalPopup(
       context: context,
       builder: (BuildContext context) {
-        return CupertinoActionSheet(
-          title:
-              robotoText("Pick Your letter", blackColor, 16, FontWeight.normal),
-          message: CupertinoPicker(
-            itemExtent: 32.0,
-            onSelectedItemChanged: (int index) {
-              setState(() {
-                _selectedLetter = _letters[index]; // Set the selected letter
-              });
-            },
-            children: _letters.map((letter) => Text(letter)).toList(),
-          ),
-          actions: [
-            CupertinoActionSheetAction(
-              child: robotoText("Done", blackColor, 16, FontWeight.normal),
-              onPressed: () {
-                Navigator.pop(context); // Close the picker
-              },
+        return SizedBox(
+          height: 300,
+          child: CupertinoActionSheet(
+            title: robotoText(
+                "Pick Your letter", blackColor, 16, FontWeight.normal),
+            message: SizedBox(
+              height: 150,
+              child: CupertinoPicker(
+                scrollController:
+                    FixedExtentScrollController(initialItem: initialIndex),
+                itemExtent: 32.0,
+                onSelectedItemChanged: (int index) {
+                  setState(() {
+                    _selectedLetter = _letters[index];
+                  });
+                },
+                children: _letters.map((letter) => Text(letter)).toList(),
+              ),
             ),
-          ],
+            actions: [
+              CupertinoActionSheetAction(
+                child: robotoText("Done", blackColor, 16, FontWeight.normal),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          ),
         );
       },
     );
   }
 
   void submitForm() {
-    if (_selectedCarBrand == null ||
-        _selectedCarModel == null ||
-        _provinceNumebr == null ||
-        _plateNumber == null ||
-        name == null ||
-        _selectedGender == null) {
+    if (_isSubmitting) return;
+
+    // Run form validators first
+    if (!_formKey.currentState!.validate()) {
       Fluttertoast.showToast(
-        msg: "Please fill out the forms correctly.",
+        msg: "Please fill out the form correctly.",
         backgroundColor: Colors.red,
       );
       return;
     }
 
-    if (_formKey.currentState!.validate()) {
-      Navigator.push(
-        context,
-        PageTransition(
-          type: PageTransitionType.rightToLeft,
-          child: OtpVerification(
-            isDriver: true,
-              licensePlate: "$_provinceNumebr $_selectedLetter $_plateNumber",
-              carBM: "$_selectedCarBrand,$_selectedCarModel",
-              gender: _selectedGender!,
-              name: name!,
-              phoneNo: widget.phoneNo,
-              isRegistered: false,
-              profilePictureUri: ''),
-        ),
-      );
-    } else {
+    // Read values from controllers (avoids null mismatch)
+    final String name = _nameController.text.trim();
+    final String provinceNumber = _provinceController.text.trim();
+    final String plateNumber = _plateController.text.trim();
+
+    // Manual validations for dropdowns and picker
+    if (_selectedCarBrand == null ||
+        _selectedCarModel == null ||
+        _selectedGender == null ||
+        _selectedLetter == null ||
+        name.isEmpty ||
+        provinceNumber.isEmpty ||
+        plateNumber.isEmpty) {
       Fluttertoast.showToast(
-          msg: "Please fill out the forms correctly.",
-          backgroundColor: Colors.red);
+        msg: "Please complete all required fields.",
+        backgroundColor: Colors.red,
+      );
+      return;
     }
+
+    // Show loading and navigate
+    setState(() {
+      _isSubmitting = true;
+    });
+
+    Navigator.push(
+      context,
+      PageTransition(
+        type: PageTransitionType.rightToLeft,
+        child: OtpVerification(
+          isDriver: true,
+          licensePlate:
+              "$provinceNumber ${_selectedLetter!.toUpperCase()} $plateNumber",
+          carBM: "$_selectedCarBrand,$_selectedCarModel",
+          gender: _selectedGender!,
+          name: name,
+          phoneNo: widget.phoneNo,
+          isRegistered: false,
+          profilePictureUri: '',
+        ),
+      ),
+    ).then((_) {
+      setState(() {
+        _isSubmitting = false;
+      });
+    });
   }
 }

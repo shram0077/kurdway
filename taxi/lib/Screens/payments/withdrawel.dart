@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class Withdrawel extends StatefulWidget {
@@ -11,8 +10,6 @@ class Withdrawel extends StatefulWidget {
 class _WithdrawelState extends State<Withdrawel> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      
-    );
+    return Scaffold();
   }
 }

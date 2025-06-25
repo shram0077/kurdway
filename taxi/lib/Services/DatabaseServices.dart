@@ -46,25 +46,25 @@ class Databaseservices {
           "email": email,
           "profilePicture": profilePictureUri,
           "currentLocation": GeoPoint(0.0, 0.0),
-          "currentCity":'',
+          "currentCity": '',
           "destination": null, // Update this dynamically during rides
           "walletBalance": 0.0,
           "rideHistory": [],
           "joinedAt": Timestamp.now(),
           'role': role,
-          'status':''
+          'status': ''
         });
         print("user Acoount created successfully. name is: $name");
 
-       if (role=='user') {
+        if (role == 'user') {
           Navigator.push(
-          context,
-          PageTransition(
-            type: PageTransitionType.rightToLeft,
-            child: HomePage(currentUserId: userId),
-          ),
-        );
-       }
+            context,
+            PageTransition(
+              type: PageTransitionType.rightToLeft,
+              child: HomePage(currentUserId: userId),
+            ),
+          );
+        }
 
         Restart.restartApp();
       } catch (e) {
@@ -99,7 +99,7 @@ class Databaseservices {
           'location': GeoPoint(0.0, 0.0),
           'status': "available",
           'rideHistory': [],
-          "isActive":false,
+          "isActive": false,
           "joinedAt": Timestamp.now(),
         });
 
@@ -175,5 +175,37 @@ class Databaseservices {
       'status': 'pending',
       'createdAt': FieldValue.serverTimestamp(),
     });
+  }
+
+  static Future updateCurrentAddress(String address, String userId) async {
+    await usersRef.doc(userId).update({'currentCity': address});
+  }
+
+  static Future updatePosition(
+      String userId, String role, double latitude, double longitude) async {
+    if (role == "passenger") {
+      await usersRef.doc(userId).update({
+        'currentLocation': {
+          'latitude': latitude,
+          'longitude': longitude,
+          'timestamp': FieldValue.serverTimestamp(),
+        }
+      });
+    } else if (role == "driver") {
+      await usersRef.doc(userId).update({
+        'currentLocation': {
+          'latitude': latitude,
+          'longitude': longitude,
+          'timestamp': FieldValue.serverTimestamp(),
+        }
+      });
+      await taxisRef.doc(userId).update({
+        'currentLocation': {
+          'latitude': latitude,
+          'longitude': longitude,
+          'timestamp': FieldValue.serverTimestamp(),
+        }
+      });
+    }
   }
 }

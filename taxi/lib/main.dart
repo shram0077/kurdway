@@ -25,7 +25,6 @@ class MyApp extends StatelessWidget {
       title: 'Kurd Way',
       theme: ThemeData(
         useMaterial3: true,
-        
       ),
       home: SplashScreen(),
     );

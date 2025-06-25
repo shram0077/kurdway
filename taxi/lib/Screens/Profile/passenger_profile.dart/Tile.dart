@@ -10,13 +10,13 @@ class CoustomTile extends StatelessWidget {
   final VoidCallback? onTap;
 
   const CoustomTile({
-    Key? key,
+    super.key,
     required this.title,
     required this.icon,
     this.iconColor = Colors.white,
     this.onTap,
     required this.islogoutTile,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

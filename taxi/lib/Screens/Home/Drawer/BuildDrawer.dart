@@ -153,7 +153,7 @@ class CustomDrawer extends StatelessWidget {
                 leading: Icon(EvaIcons.logOut),
                 title: Text('Logout'),
                 onTap: () {
-               Auth.logout();
+                  Auth.logout();
                   // Perform logout operation
                 },
               ),

@@ -9,7 +9,7 @@ Widget robotoText(
 ) {
   return Text(
     text,
-    style: GoogleFonts.roboto(
+    style: GoogleFonts.poppins(
         color: color, fontWeight: fontWeight, fontSize: size),
   );
 }

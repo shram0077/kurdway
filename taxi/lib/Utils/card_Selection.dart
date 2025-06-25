@@ -64,11 +64,11 @@ class LoadingCardSelection extends StatefulWidget {
   final Color color;
 
   const LoadingCardSelection({
-    Key? key,
+    super.key,
     required this.imgPath,
     required this.sloganText,
     required this.color,
-  }) : super(key: key);
+  });
 
   @override
   _LoadingCardSelectionState createState() => _LoadingCardSelectionState();

@@ -35,7 +35,7 @@ class _SplashScreenState extends State<SplashScreen> {
                   child: Text(
                     "On Time.\nEvery Time.",
                     style: GoogleFonts.openSans(
-                        color: taxiYelloColor,
+                        color: taxiYellowColor,
                         fontWeight: FontWeight.bold,
                         fontSize: 27),
                   ),

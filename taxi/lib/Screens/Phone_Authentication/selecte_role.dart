@@ -128,7 +128,7 @@ class _SelecteYourRoleState extends State<SelecteYourRole> {
                 width: 205,
                 height: 48,
                 decoration: ShapeDecoration(
-                  color: taxiYelloColor,
+                  color: taxiYellowColor,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.only(
                         bottomLeft: Radius.circular(12),
