@@ -8,10 +8,11 @@ KurdWay is a modern ride-hailing and bus-tracking application built with **Flutt
 
 * 🚖 **Taxi Booking**: Book rides with real-time tracking and trip details.
 * 🚌 **Bus Tracking**: View nearby buses with live location updates.
-* 💳 **Wallet System**: Recharge your balance and pay seamlessly.
+* 💳 **Wallet System**: Recharge your balance and pay seamlessly. *(Internal)*
 * 🗜️ **Google Maps Integration**: Real-time location, routes, and directions.
-* 🧰 **Admin Panel**: Web & desktop panel to manage rides, users, and transactions.
+* 🧰 **Admin Panel**: Web & desktop panel to manage rides, users, and transactions. *(Paid)*
 * 🔐 **OTP Authentication**: Secure login and sign-up using phone verification.
+* ☁️ **Profile Image Upload**: Uses Filelua cloud storage to upload and store user profile pictures.
 * 🌐 **Multiplatform**: Supports Android, iOS, Web, Windows, Mac, and Linux.
 
 ---
@@ -20,15 +21,15 @@ KurdWay is a modern ride-hailing and bus-tracking application built with **Flutt
 
 ### 🔹 Core Flutter Packages
 
-| Feature                    | Package                                                                         |
-| -------------------------- | ------------------------------------------------------------------------------- |
-| UI                         | `flutter_svg`, `lottie`, `google_fonts`, `eva_icons_flutter`, `cupertino_icons` |
-| Animations & Transitions   | `animated_splash_screen`, `page_transition`                                     |
-| State Management & Routing | `get`                                                                           |
-| Image Handling             | `image_picker`, `image_cropper`, `cached_network_image`                         |
-| Input & Auth               | `pin_code_fields`, `fluttertoast`                                               |
-| Preferences                | `shared_preferences`, `intl`                                                    |
-| App Control                | `restart_app`                                                                   |
+| Feature                    | Package                                                                                    |
+| -------------------------- | ------------------------------------------------------------------------------------------ |
+| UI                         | `flutter_svg`, `lottie`, `google_fonts`, `eva_icons_flutter`, `cupertino_icons`, `Shimmer` |
+| Animations & Transitions   | `animated_splash_screen`, `page_transition`                                                |
+| State Management & Routing | `get`                                                                                      |
+| Image Handling             | `image_picker`, `image_cropper`, `cached_network_image`                                    |
+| Input & Auth               | `pin_code_fields`, `fluttertoast`                                                          |
+| Preferences                | `shared_preferences`, `intl`                                                               |
+| App Control                | `restart_app`                                                                              |
 
 ### 🔥 Firebase
 
