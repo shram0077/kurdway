@@ -141,8 +141,12 @@ Feel free to use it for personal or commercial purposes with attribution.
 
 ## 📞 Contact
 
-For questions or feedback,
-📧 **Email**: [shram0077@gmail.com](mailto:shram0077@gmail.com)
-🔗 **GitHub**: [@shram0077](https://github.com/shram0077)
+For questions or feedback,  
+📧 **Email**: [shram0077@gmail.com](mailto:shram0077@gmail.com)  
+🔗 **GitHub**: [@shram0077](https://github.com/shram0077)  
+💼 **LinkedIn**: [linkedin.com/in/shram0077](https://www.linkedin.com/in/shram-mahmood-6aa80b256)  
+📘 **Facebook**: [facebook.com/shram0077](https://www.facebook.com/shram0077)  
+📸 **Instagram**: [instagram.com/shram0077](https://www.instagram.com/vex.o7)
 
 ---
+
